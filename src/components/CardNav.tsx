@@ -1,32 +1,32 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { GoArrowUpRight } from 'react-icons/go';
-import { WalletButton } from './solana/solana-provider';
-import { ClusterUiSelect } from './cluster/cluster-ui';
+import React, { useLayoutEffect, useRef, useState } from 'react'
+import { gsap } from 'gsap'
+import { GoArrowUpRight } from 'react-icons/go'
+import { WalletButton } from './solana/solana-provider'
+import { ClusterUiSelect } from './cluster/cluster-ui'
 
 type CardNavLink = {
-  label: string;
-  href: string;
-  ariaLabel: string;
-};
+  label: string
+  href: string
+  ariaLabel: string
+}
 
 export type CardNavItem = {
-  label: string;
-  bgColor: string;
-  textColor: string;
-  links: CardNavLink[];
-};
+  label: string
+  bgColor: string
+  textColor: string
+  links: CardNavLink[]
+}
 
 export interface CardNavProps {
-  logo: string;
-  logoAlt?: string;
-  items: CardNavItem[];
-  className?: string;
-  ease?: string;
-  baseColor?: string;
-  menuColor?: string;
-  buttonBgColor?: string;
-  buttonTextColor?: string;
+  logo: string
+  logoAlt?: string
+  items: CardNavItem[]
+  className?: string
+  ease?: string
+  baseColor?: string
+  menuColor?: string
+  buttonBgColor?: string
+  buttonTextColor?: string
 }
 
 const CardNav: React.FC<CardNavProps> = ({
@@ -38,118 +38,118 @@ const CardNav: React.FC<CardNavProps> = ({
   baseColor = '#fff',
   menuColor,
 }) => {
-  const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const navRef = useRef<HTMLDivElement | null>(null);
-  const cardsRef = useRef<HTMLDivElement[]>([]);
-  const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const [isHamburgerOpen, setIsHamburgerOpen] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const navRef = useRef<HTMLDivElement | null>(null)
+  const cardsRef = useRef<HTMLDivElement[]>([])
+  const tlRef = useRef<gsap.core.Timeline | null>(null)
 
   const calculateHeight = () => {
-    const navEl = navRef.current;
-    if (!navEl) return 60;
+    const navEl = navRef.current
+    if (!navEl) return 60
 
-    const contentEl = navEl.querySelector('.card-nav-content') as HTMLElement;
+    const contentEl = navEl.querySelector('.card-nav-content') as HTMLElement
     if (contentEl) {
-      const wasVisible = contentEl.style.visibility;
-      const wasPointerEvents = contentEl.style.pointerEvents;
-      const wasPosition = contentEl.style.position;
-      const wasHeight = contentEl.style.height;
+      const wasVisible = contentEl.style.visibility
+      const wasPointerEvents = contentEl.style.pointerEvents
+      const wasPosition = contentEl.style.position
+      const wasHeight = contentEl.style.height
 
-      contentEl.style.visibility = 'visible';
-      contentEl.style.pointerEvents = 'auto';
-      contentEl.style.position = 'static';
-      contentEl.style.height = 'auto';
+      contentEl.style.visibility = 'visible'
+      contentEl.style.pointerEvents = 'auto'
+      contentEl.style.position = 'static'
+      contentEl.style.height = 'auto'
 
-      void contentEl.offsetHeight;
+      void contentEl.offsetHeight
 
-      const topBar = 60;
-      const padding = 16;
-      const contentHeight = contentEl.scrollHeight;
+      const topBar = 60
+      const padding = 16
+      const contentHeight = contentEl.scrollHeight
 
-      contentEl.style.visibility = wasVisible;
-      contentEl.style.pointerEvents = wasPointerEvents;
-      contentEl.style.position = wasPosition;
-      contentEl.style.height = wasHeight;
+      contentEl.style.visibility = wasVisible
+      contentEl.style.pointerEvents = wasPointerEvents
+      contentEl.style.position = wasPosition
+      contentEl.style.height = wasHeight
 
-      return topBar + contentHeight + padding;
+      return topBar + contentHeight + padding
     }
-    return 60;
-  };
+    return 60
+  }
 
   const createTimeline = () => {
-    const navEl = navRef.current;
-    if (!navEl) return null;
+    const navEl = navRef.current
+    if (!navEl) return null
 
-    const tl = gsap.timeline({ paused: true });
+    const tl = gsap.timeline({ paused: true })
 
     tl.to(navEl, {
       height: calculateHeight,
       duration: 0.4,
-      ease
-    });
+      ease,
+    })
 
-    tl.to(cardsRef.current, { y: 0, opacity: 1, duration: 0.4, ease, stagger: 0.08 }, '-=0.1');
+    tl.to(cardsRef.current, { y: 0, opacity: 1, duration: 0.4, ease, stagger: 0.08 }, '-=0.1')
 
-    return tl;
-  };
+    return tl
+  }
 
   useLayoutEffect(() => {
     if (navRef.current) {
-      gsap.set(navRef.current, { height: 60, overflow: 'visible' });
+      gsap.set(navRef.current, { height: 60, overflow: 'visible' })
     }
     if (cardsRef.current.length) {
-      gsap.set(cardsRef.current, { y: 50, opacity: 0 });
+      gsap.set(cardsRef.current, { y: 50, opacity: 0 })
     }
 
-    const tl = createTimeline();
-    tlRef.current = tl;
+    const tl = createTimeline()
+    tlRef.current = tl
 
     return () => {
-      tl?.kill();
-      tlRef.current = null;
-    };
-  }, [ease, items]);
+      tl?.kill()
+      tlRef.current = null
+    }
+  }, [ease, items])
 
   useLayoutEffect(() => {
     const handleResize = () => {
-      if (!tlRef.current) return;
+      if (!tlRef.current) return
 
       if (window.matchMedia('(min-width: 768px)').matches && isExpanded) {
-        setIsHamburgerOpen(false);
-        setIsExpanded(false);
-        gsap.set(navRef.current, { height: 60 });
-        return;
+        setIsHamburgerOpen(false)
+        setIsExpanded(false)
+        gsap.set(navRef.current, { height: 60 })
+        return
       }
 
       if (isExpanded) {
-        const newHeight = calculateHeight();
-        gsap.to(navRef.current, { height: newHeight, duration: 0.2 });
+        const newHeight = calculateHeight()
+        gsap.to(navRef.current, { height: newHeight, duration: 0.2 })
       }
-    };
+    }
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [isExpanded]);
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isExpanded])
 
   const toggleMenu = () => {
-    const tl = tlRef.current;
-    if (!tl) return;
+    const tl = tlRef.current
+    if (!tl) return
     if (!isExpanded) {
-      setIsHamburgerOpen(true);
-      setIsExpanded(true);
-      tl.play(0);
+      setIsHamburgerOpen(true)
+      setIsExpanded(true)
+      tl.play(0)
     } else {
-      setIsHamburgerOpen(false);
-      tl.eventCallback('onReverseComplete', () => setIsExpanded(false));
-      tl.reverse();
+      setIsHamburgerOpen(false)
+      tl.eventCallback('onReverseComplete', () => setIsExpanded(false))
+      tl.reverse()
     }
-  };
+  }
 
   const setCardRef = (i: number) => (el: HTMLDivElement | null) => {
-    if (el) cardsRef.current[i] = el;
-  };
+    if (el) cardsRef.current[i] = el
+  }
 
-  const allLinks = items.flatMap((item) => item.links);
+  const allLinks = items.flatMap((item) => item.links)
 
   return (
     <div
@@ -232,7 +232,7 @@ const CardNav: React.FC<CardNavProps> = ({
         </div>
       </nav>
     </div>
-  );
-};
+  )
+}
 
-export default CardNav;
+export default CardNav

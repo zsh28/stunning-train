@@ -1,28 +1,28 @@
-import React, { CSSProperties, PropsWithChildren, useEffect, useId, useLayoutEffect, useRef } from 'react';
+import React, { CSSProperties, PropsWithChildren, useEffect, useId, useLayoutEffect, useRef } from 'react'
 
 type ElectricBorderProps = PropsWithChildren<{
-  color?: string;
-  speed?: number;
-  chaos?: number;
-  thickness?: number;
-  className?: string;
-  style?: CSSProperties;
-}>;
+  color?: string
+  speed?: number
+  chaos?: number
+  thickness?: number
+  className?: string
+  style?: CSSProperties
+}>
 
 function hexToRgba(hex: string, alpha = 1): string {
-  if (!hex) return `rgba(0,0,0,${alpha})`;
-  let h = hex.replace('#', '');
+  if (!hex) return `rgba(0,0,0,${alpha})`
+  let h = hex.replace('#', '')
   if (h.length === 3) {
     h = h
       .split('')
-      .map(c => c + c)
-      .join('');
+      .map((c) => c + c)
+      .join('')
   }
-  const int = parseInt(h, 16);
-  const r = (int >> 16) & 255;
-  const g = (int >> 8) & 255;
-  const b = int & 255;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  const int = parseInt(h, 16)
+  const r = (int >> 16) & 255
+  const g = (int >> 8) & 255
+  const b = int & 255
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
 const ElectricBorder: React.FC<ElectricBorderProps> = ({
@@ -32,86 +32,86 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
   chaos = 1,
   thickness = 2,
   className,
-  style
+  style,
 }) => {
-  const rawId = useId().replace(/[:]/g, '');
-  const filterId = `turbulent-displace-${rawId}`;
-  const svgRef = useRef<SVGSVGElement | null>(null);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const strokeRef = useRef<HTMLDivElement | null>(null);
+  const rawId = useId().replace(/[:]/g, '')
+  const filterId = `turbulent-displace-${rawId}`
+  const svgRef = useRef<SVGSVGElement | null>(null)
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  const strokeRef = useRef<HTMLDivElement | null>(null)
 
   const updateAnim = () => {
-    const svg = svgRef.current;
-    const host = rootRef.current;
-    if (!svg || !host) return;
+    const svg = svgRef.current
+    const host = rootRef.current
+    if (!svg || !host) return
 
     if (strokeRef.current) {
-      strokeRef.current.style.filter = `url(#${filterId})`;
+      strokeRef.current.style.filter = `url(#${filterId})`
     }
 
-    const width = Math.max(1, Math.round(host.clientWidth || host.getBoundingClientRect().width || 0));
-    const height = Math.max(1, Math.round(host.clientHeight || host.getBoundingClientRect().height || 0));
+    const width = Math.max(1, Math.round(host.clientWidth || host.getBoundingClientRect().width || 0))
+    const height = Math.max(1, Math.round(host.clientHeight || host.getBoundingClientRect().height || 0))
 
-    const dyAnims = Array.from(svg.querySelectorAll<SVGAnimateElement>('feOffset > animate[attributeName="dy"]'));
+    const dyAnims = Array.from(svg.querySelectorAll<SVGAnimateElement>('feOffset > animate[attributeName="dy"]'))
     if (dyAnims.length >= 2) {
-      dyAnims[0].setAttribute('values', `${height}; 0`);
-      dyAnims[1].setAttribute('values', `0; -${height}`);
+      dyAnims[0].setAttribute('values', `${height}; 0`)
+      dyAnims[1].setAttribute('values', `0; -${height}`)
     }
 
-    const dxAnims = Array.from(svg.querySelectorAll<SVGAnimateElement>('feOffset > animate[attributeName="dx"]'));
+    const dxAnims = Array.from(svg.querySelectorAll<SVGAnimateElement>('feOffset > animate[attributeName="dx"]'))
     if (dxAnims.length >= 2) {
-      dxAnims[0].setAttribute('values', `${width}; 0`);
-      dxAnims[1].setAttribute('values', `0; -${width}`);
+      dxAnims[0].setAttribute('values', `${width}; 0`)
+      dxAnims[1].setAttribute('values', `0; -${width}`)
     }
 
-    const baseDur = 6;
-    const dur = Math.max(0.001, baseDur / (speed || 1));
-    [...dyAnims, ...dxAnims].forEach(a => a.setAttribute('dur', `${dur}s`));
+    const baseDur = 6
+    const dur = Math.max(0.001, baseDur / (speed || 1))
+    ;[...dyAnims, ...dxAnims].forEach((a) => a.setAttribute('dur', `${dur}s`))
 
-    const disp = svg.querySelector('feDisplacementMap');
-    if (disp) disp.setAttribute('scale', String(30 * (chaos || 1)));
+    const disp = svg.querySelector('feDisplacementMap')
+    if (disp) disp.setAttribute('scale', String(30 * (chaos || 1)))
 
-    const filterEl = svg.querySelector<SVGFilterElement>(`#${CSS.escape(filterId)}`);
+    const filterEl = svg.querySelector<SVGFilterElement>(`#${CSS.escape(filterId)}`)
     if (filterEl) {
-      filterEl.setAttribute('x', '-200%');
-      filterEl.setAttribute('y', '-200%');
-      filterEl.setAttribute('width', '500%');
-      filterEl.setAttribute('height', '500%');
+      filterEl.setAttribute('x', '-200%')
+      filterEl.setAttribute('y', '-200%')
+      filterEl.setAttribute('width', '500%')
+      filterEl.setAttribute('height', '500%')
     }
 
     requestAnimationFrame(() => {
-      [...dyAnims, ...dxAnims].forEach((a: any) => {
+      ;[...dyAnims, ...dxAnims].forEach((a: any) => {
         if (typeof a.beginElement === 'function') {
           try {
-            a.beginElement();
+            a.beginElement()
           } catch {}
         }
-      });
-    });
-  };
+      })
+    })
+  }
 
   useEffect(() => {
-    updateAnim();
-  }, [speed, chaos]);
+    updateAnim()
+  }, [speed, chaos])
 
   useLayoutEffect(() => {
-    if (!rootRef.current) return;
-    const ro = new ResizeObserver(() => updateAnim());
-    ro.observe(rootRef.current);
-    updateAnim();
-    return () => ro.disconnect();
-  }, []);
+    if (!rootRef.current) return
+    const ro = new ResizeObserver(() => updateAnim())
+    ro.observe(rootRef.current)
+    updateAnim()
+    return () => ro.disconnect()
+  }, [])
 
   const inheritRadius: CSSProperties = {
-    borderRadius: style?.borderRadius ?? 'inherit'
-  };
+    borderRadius: style?.borderRadius ?? 'inherit',
+  }
 
   const strokeStyle: CSSProperties = {
     ...inheritRadius,
     borderWidth: thickness,
     borderStyle: 'solid',
-    borderColor: color
-  };
+    borderColor: color,
+  }
 
   const glow1Style: CSSProperties = {
     ...inheritRadius,
@@ -119,8 +119,8 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     borderStyle: 'solid',
     borderColor: hexToRgba(color, 0.6),
     filter: `blur(${0.5 + thickness * 0.25}px)`,
-    opacity: 0.5
-  };
+    opacity: 0.5,
+  }
 
   const glow2Style: CSSProperties = {
     ...inheritRadius,
@@ -128,8 +128,8 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     borderStyle: 'solid',
     borderColor: color,
     filter: `blur(${2 + thickness * 0.5}px)`,
-    opacity: 0.5
-  };
+    opacity: 0.5,
+  }
 
   const bgGlowStyle: CSSProperties = {
     ...inheritRadius,
@@ -137,8 +137,8 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     filter: 'blur(32px)',
     opacity: 0.3,
     zIndex: -1,
-    background: `linear-gradient(-30deg, ${hexToRgba(color, 0.8)}, transparent, ${color})`
-  };
+    background: `linear-gradient(-30deg, ${hexToRgba(color, 0.8)}, transparent, ${color})`,
+  }
 
   return (
     <div ref={rootRef} className={'relative isolate ' + (className ?? '')} style={style}>
@@ -195,7 +195,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
         <div className="absolute inset-0" style={bgGlowStyle} />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ElectricBorder;
+export default ElectricBorder
