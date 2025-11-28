@@ -60,9 +60,9 @@ export function ClusterUiSelect() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline">{cluster.name}</Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="border-white/10 text-white" style={{ background: 'rgba(0, 0, 0, 0.8)' }}>
         {clusters.map((item) => (
-          <DropdownMenuItem key={item.name} onClick={() => setCluster(item)}>
+          <DropdownMenuItem key={item.name} onClick={() => setCluster(item)} className="focus:bg-white/10 focus:text-white cursor-pointer">
             {item.name}
           </DropdownMenuItem>
         ))}
