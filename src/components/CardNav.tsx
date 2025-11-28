@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
 import { gsap } from 'gsap'
 import { GoArrowUpRight } from 'react-icons/go'
 import { WalletButton } from './solana/solana-provider'
@@ -41,12 +41,12 @@ const CardNav: React.FC<CardNavProps> = ({
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const navRef = useRef<HTMLDivElement | null>(null)
-  const cardsRef = useRef<HTMLDivElement[]>([])
-  const tlRef = useRef<gsap.core.Timeline | null>(null)
+  const cardsRef = useRef<HTMLDivElement[]>([]);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
-  const calculateHeight = () => {
-    const navEl = navRef.current
-    if (!navEl) return 60
+  const calculateHeight = useCallback(() => {
+    const navEl = navRef.current;
+    if (!navEl) return 60;
 
     const contentEl = navEl.querySelector('.card-nav-content') as HTMLElement
     if (contentEl) {
@@ -74,9 +74,9 @@ const CardNav: React.FC<CardNavProps> = ({
       return topBar + contentHeight + padding
     }
     return 60
-  }
+  }, [])
 
-  const createTimeline = () => {
+  const createTimeline = useCallback(() => {
     const navEl = navRef.current
     if (!navEl) return null
 
@@ -91,7 +91,7 @@ const CardNav: React.FC<CardNavProps> = ({
     tl.to(cardsRef.current, { y: 0, opacity: 1, duration: 0.4, ease, stagger: 0.08 }, '-=0.1')
 
     return tl
-  }
+  }, [calculateHeight, ease])
 
   useLayoutEffect(() => {
     if (navRef.current) {
@@ -108,7 +108,7 @@ const CardNav: React.FC<CardNavProps> = ({
       tl?.kill()
       tlRef.current = null
     }
-  }, [ease, items])
+  }, [ease, items, createTimeline])
 
   useLayoutEffect(() => {
     const handleResize = () => {
@@ -129,7 +129,7 @@ const CardNav: React.FC<CardNavProps> = ({
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [isExpanded])
+  }, [isExpanded, calculateHeight])
 
   const toggleMenu = () => {
     const tl = tlRef.current
@@ -182,6 +182,7 @@ const CardNav: React.FC<CardNavProps> = ({
           </div>
 
           <div className="logo-container flex items-center order-2 md:order-1 md:mr-6">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logo} alt={logoAlt} className="logo h-7" />
           </div>
 
